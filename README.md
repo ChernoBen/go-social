@@ -22,3 +22,4 @@ O nome **mux** significa “**multiplexador** de solicitação HTTP“. Como o h
 # Desenvolvimento
 - go mod init nome-projeto
 - criação do inicializador da api main.go
+- criação do pacote router && intalação do mux dentro de src
