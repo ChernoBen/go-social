@@ -28,6 +28,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 	//apos aberta a con com banco, criar repo
 	repo := repositories.NewUserRepository(db)
 	//agora podemos chamar um metodo da struct dentro de repo
