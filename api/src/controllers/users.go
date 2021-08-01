@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 //Insert an User in DB
@@ -52,9 +53,28 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	//w.Write([]byte(fmt.Sprintf("User inserted ID:%d", userID)))
 }
 
-//Get all User on DB
+//Get all User on DB /parametros name or nick ex:/users or /users?name=benja or /users?nick=benja
 func GetUsers(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Getting Users"))
+	// ler parametros passados na url e obter usuario
+	nameOrNick := strings.ToLower(r.URL.Query().Get("user"))
+	// a partir desse ponto posso abrir a conexão com o banco
+	db, err := database.Connect()
+	if err != nil {
+		//devolver internal error
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	//instanciar repo para obter usuario
+	repo := repositories.NewUserRepository(db)
+	// executar busca
+	users, err := repo.FindByNameOrNick(nameOrNick)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.Json(w, http.StatusOK, users)
+
 }
 
 //Get one user by ID
