@@ -108,3 +108,21 @@ func (u User) FindByID(id uint64) (models.User, error) {
 	}
 	return user, nil
 }
+
+//metodo que recebe um id e struct com dados de usuario, atualiza usuario e retorna um err
+func (u User) Update(ID uint64, user models.User) error {
+	//criar statement
+	statement, err := u.db.Prepare(
+		"UPDATE users SET name = ?, nick = ?, email = ? WHERE id = ?",
+	)
+	if err != nil {
+		return err
+	}
+	//fechar statement
+	defer statement.Close()
+	//executar statement
+	if _, err := statement.Exec(user.Name, user.Nick, user.Email, ID); err != nil {
+		return err
+	}
+	return nil
+}
