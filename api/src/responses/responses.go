@@ -8,6 +8,8 @@ import (
 
 //função que retornar respostas em formato json
 func Json(w http.ResponseWriter, statusCode int, data interface{}) {
+	//setar formato do conteudo como json/ dessa maneira a respostas serão entregues em json
+	w.Header().Set("Content-Type", "application/json")
 	//passar o status code na response
 	w.WriteHeader(statusCode)
 	//criar json contendo as informações
