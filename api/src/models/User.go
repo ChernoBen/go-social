@@ -1,6 +1,7 @@
 package models
 
 import (
+	"api/src/security"
 	"errors"
 	"strings"
 	"time"
@@ -25,7 +26,9 @@ func (u *User) Prepare(step string) error {
 	if err := u.isValid(step); err != nil {
 		return err
 	}
-	u.wipeSpace()
+	if err := u.format(step); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -49,9 +52,17 @@ func (u *User) isValid(step string) error {
 	return nil
 }
 
-//metodo que remove espacos no inicio a no fim de strings
-func (u *User) wipeSpace() {
+//metodo que remove espacos no inicio a no fim de strings e isere hash no campo password
+func (u *User) format(step string) error {
 	u.Name = strings.TrimSpace(u.Name)
 	u.Nick = strings.TrimSpace(u.Nick)
 	u.Email = strings.TrimSpace(u.Email)
+	if step == "register" {
+		hashPass, err := security.Hash(u.Password)
+		if err != nil {
+			return err
+		}
+		u.Password = string(hashPass)
+	}
+	return nil
 }
