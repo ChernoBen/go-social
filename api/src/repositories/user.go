@@ -3,6 +3,7 @@ package repositories
 import (
 	"api/src/models"
 	"database/sql"
+	"fmt"
 )
 
 //conexão será aberta no controller e passada para essa struct
@@ -42,4 +43,37 @@ func (u User) Create(user models.User) (uint64, error) {
 	}
 	//retornar id int convertido para uint64
 	return uint64(userID), nil
+}
+
+//metodo de User que recebe uma string e retorna um slice de models.User e um erro/busca usuarios 'like' nameOrNick
+func (u User) FindByNameOrNick(nameOrNick string) ([]models.User, error) {
+	//formatando string para padrões de consulta
+	nameOrNick = fmt.Sprintf("%%%s%%", nameOrNick)
+	// criando query / struct user.db.query
+	lines, err := u.db.Query(
+		"SELECT id,name,nick,email,createdat FROM users WHERE name LIKE ? or nick LIKE ?",
+		nameOrNick, nameOrNick,
+	)
+	if err != nil {
+		return nil, err
+	}
+	// fechar
+	defer lines.Close()
+	//iterar lines e armazenar cada item em um slice do tipo models.user
+	var users []models.User
+	for lines.Next() {
+		var item models.User
+		if err = lines.Scan(
+			&item.ID,
+			&item.Name,
+			&item.Nick,
+			&item.Email,
+			&item.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		//adicionar item ao slice
+		users = append(users, item)
+	}
+	return users, nil
 }
