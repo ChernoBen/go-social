@@ -14,6 +14,8 @@ var (
 	DbUri = ""
 	//api port
 	ApiPort = 0
+	//chave passa assinar o token
+	Secret []byte
 )
 
 //função inicializa variaveis de ambiente
@@ -35,4 +37,5 @@ func Load() {
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 	)
+	Secret = []byte(os.Getenv("SECRET_KEY"))
 }
