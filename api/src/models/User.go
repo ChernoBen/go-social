@@ -18,9 +18,9 @@ type User struct {
 
 //omitempty = omitir se vazio
 
-//função global que e chama os metodos de verificação e formatação
-func (u *User) Prepare() error {
-	if err := u.isValid(); err != nil {
+//função global que e chama os metodos de verificação e formatação/ parametro step para definir se é uma estapa de criação ou edição de usuario
+func (u *User) Prepare(step string) error {
+	if err := u.isValid(step); err != nil {
 		return err
 	}
 	u.wipeSpace()
@@ -28,7 +28,7 @@ func (u *User) Prepare() error {
 }
 
 //Metodo que verifica se todos os campos estão preenchidos
-func (u *User) isValid() error {
+func (u *User) isValid(step string) error {
 	if u.Name == "" {
 		return errors.New("Name should not be empty")
 	}
@@ -38,7 +38,7 @@ func (u *User) isValid() error {
 	if u.Email == "" {
 		return errors.New("Email should not be empty")
 	}
-	if u.Password == "" {
+	if step == "register" && u.Password == "" {
 		return errors.New("Password should not be empty")
 	}
 	return nil
