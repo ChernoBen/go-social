@@ -79,11 +79,11 @@ func (u User) FindByNameOrNick(nameOrNick string) ([]models.User, error) {
 }
 
 //metodo de User que recebe um id e retorna um usuario e um erro
-func (u User) FindByID(id uint64) (models.User, error) {
+func (u User) FindByID(ID uint64) (models.User, error) {
 	//criando query / struct user.db.query
 	lines, err := u.db.Query(
 		"SELECT id,name,email,createdat FROM users WHERE id = ?",
-		id,
+		ID,
 	)
 	if err != nil {
 		//retornar uma instancia vazia
@@ -122,6 +122,24 @@ func (u User) Update(ID uint64, user models.User) error {
 	defer statement.Close()
 	//executar statement
 	if _, err := statement.Exec(user.Name, user.Nick, user.Email, ID); err != nil {
+		return err
+	}
+	return nil
+}
+
+// metodo que recebe um id, deleta usuario e retorna um erro
+func (u User) Delete(ID uint64) error {
+	//criar statement
+	statement, err := u.db.Prepare(
+		"DELETE FROM users WHERE id = ?",
+	)
+	if err != nil {
+		return err
+	}
+	//fechar
+	defer statement.Close()
+	//executar
+	if _, err = statement.Exec(ID); err != nil {
 		return err
 	}
 	return nil
