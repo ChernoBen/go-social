@@ -8,7 +8,10 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 //Insert an User in DB
@@ -79,7 +82,31 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 //Get one user by ID
 func GetUserById(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Getting an User"))
+	//obter parametros da rota
+	params := mux.Vars(r)
+	//obtendo id e convertendo para Uint64
+	userID, err := strconv.ParseUint(params["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	//abrir conexão com banco
+	db, err := database.Connect()
+	if err != nil {
+		//devolver internal error
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	//intanciar repo passando a conexão com db
+	repo := repositories.NewUserRepository(db)
+	//executar busca por id
+	user, err := repo.FindByID(userID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.Json(w, http.StatusOK, user)
 }
 
 //Update an User by passing his ID
