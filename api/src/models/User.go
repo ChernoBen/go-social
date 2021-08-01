@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"github.com/badoux/checkmail"
 )
 
 //estrutura representado tabela de usuarios com campos mapeados em json
@@ -37,6 +39,9 @@ func (u *User) isValid(step string) error {
 	}
 	if u.Email == "" {
 		return errors.New("Email should not be empty")
+	}
+	if err := checkmail.ValidateFormat(u.Email); err != nil {
+		return errors.New("Invalid email")
 	}
 	if step == "register" && u.Password == "" {
 		return errors.New("Password should not be empty")
