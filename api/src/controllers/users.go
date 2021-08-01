@@ -31,7 +31,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//verifica se dados de entrada são válidos
-	if err := user.Prepare(); err != nil {
+	if err := user.Prepare("register"); err != nil {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
 	}
@@ -109,9 +109,48 @@ func GetUserById(w http.ResponseWriter, r *http.Request) {
 	responses.Json(w, http.StatusOK, user)
 }
 
-//Update an User by passing his ID
+//Update an User by passing his ID / este metodo nao deve atualizar a senha do usuario
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Updating an User"))
+	//primeiro obter id no parametro da rota
+	param := mux.Vars(r)
+	//obter id e converter p/ Uint64
+	userID, err := strconv.ParseUint(param["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	//obter dados do corpo da request
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	//inserir corpo da requisição dentro da estrutura models.Usuario
+	var user models.User
+	if err = json.Unmarshal(reqBody, &user); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	//tratar dados
+	if err = user.Prepare("edit"); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	// abrir conexão com banco
+	db, err := database.Connect()
+	if err != nil {
+		//devolver internal error
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	//intanciar repo passando conexão com banco
+	repo := repositories.NewUserRepository(db)
+	if err = repo.Update(userID, user); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.Json(w, http.StatusNoContent, nil)
 }
 
 //Delete an User by passing his ID
