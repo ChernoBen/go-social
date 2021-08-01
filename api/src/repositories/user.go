@@ -77,3 +77,34 @@ func (u User) FindByNameOrNick(nameOrNick string) ([]models.User, error) {
 	}
 	return users, nil
 }
+
+//metodo de User que recebe um id e retorna um usuario e um erro
+func (u User) FindByID(id uint64) (models.User, error) {
+	//criando query / struct user.db.query
+	lines, err := u.db.Query(
+		"SELECT id,name,email,createdat FROM users WHERE id = ?",
+		id,
+	)
+	if err != nil {
+		//retornar uma instancia vazia
+		return models.User{}, err
+	}
+	//fechando
+	defer lines.Close()
+
+	var user models.User
+	// se tive uma linha a ser lida sera passada
+	if lines.Next() {
+		//ler a linha passando o endereco de memoria dos campos
+		if err = lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Email,
+			&user.CreatedAt,
+		); err != nil {
+			return models.User{}, err
+		}
+
+	}
+	return user, nil
+}
