@@ -20,6 +20,8 @@ type Route struct {
 func Config(r *mux.Router) *mux.Router {
 	//carregar as rotas de usuarios
 	routes := userRoutes
+	//adicionando novas rotas
+	routes = append(routes, loginRoute)
 	//usar handlefunc para configurar cada rota
 	for _, route := range routes {
 		//para cada rota em routes crie:
