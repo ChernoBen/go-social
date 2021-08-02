@@ -182,3 +182,18 @@ func (u User) Follow(userID, FollowerID uint64) error {
 	}
 	return nil
 }
+
+//metodo permite que um usuario pare de seguir outro
+func (u User) Unfollow(userID, FollowerID uint64) error {
+	statement, err := u.db.Prepare(
+		"DELETE FROM followers WHERE user_id = ? AND follower_id = ?",
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+	if _, err = statement.Exec(userID, FollowerID); err != nil {
+		return err
+	}
+	return nil
+}
