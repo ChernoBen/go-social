@@ -166,3 +166,19 @@ func (u User) FindByEmail(email string) (models.User, error) {
 	}
 	return user, nil
 }
+
+//metodo permite um usuario seguir outro /
+func (u User) Follow(userID, FollowerID uint64) error {
+	//clausula ignore: nao insere um dado na tabela caso ja exista
+	statement, err := u.db.Prepare(
+		"INSERT IGNORE INTO followers (user_id, follower_id) VALUES (?, ?)",
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+	if _, err := statement.Exec(FollowerID, userID); err != nil {
+		return err
+	}
+	return nil
+}
