@@ -232,3 +232,34 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 	responses.Json(w, http.StatusNoContent, nil)
 
 }
+
+//Unfollow an user/id de quem quer deixar de seguir como parametro
+func Unfollow(w http.ResponseWriter, r *http.Request) {
+	follower, err := authentication.GetID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+	params := mux.Vars(r)
+	paramID, err := strconv.ParseUint(params["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	if follower == paramID {
+		responses.Error(w, http.StatusForbidden, errors.New("Can not unfollow yourself"))
+		return
+	}
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	repo := repositories.NewUserRepository(db)
+	if err = repo.Unfollow(paramID, follower); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.Json(w, http.StatusNoContent, nil)
+}
