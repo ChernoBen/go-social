@@ -173,6 +173,15 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
 	}
+	tokenID, err := authentication.GetID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+	if tokenID != userID {
+		responses.Error(w, http.StatusForbidden, err)
+		return
+	}
 	//abrir conexao
 	db, err := database.Connect()
 	if err != nil {
