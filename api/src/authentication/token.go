@@ -3,6 +3,10 @@ package authentication
 //importar json web token e atribuir um alias
 import (
 	"api/src/config"
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -20,4 +24,39 @@ func GenToken(userID uint64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, permissions)
 	//assinar token
 	return token.SignedString(config.Secret)
+}
+
+//funcao que valida token
+func Validate(r *http.Request) error {
+	token := getToken(r)
+	tk, err := jwt.Parse(token, getKey)
+	if err != nil {
+		return err
+	}
+	//validar token
+	if _, ok := tk.Claims.(jwt.MapClaims); ok && tk.Valid {
+		return nil
+	}
+	return errors.New("Invalid Token")
+}
+
+//funcao local que extrai token da request e retorna uma string
+func getToken(r *http.Request) string {
+	// pegando Bearer token da requisição
+	token := r.Header.Get("authorization")
+	//processando e verificando token
+	if len(strings.Split(token, " ")) == 2 {
+		// se existir 2 palavras entao retorne a indice 1
+		return strings.Split(token, " ")[1]
+	}
+	return ""
+}
+
+//funcao local que obtem metodo de assinatura do token
+func getKey(token *jwt.Token) (interface{}, error) {
+	//verifica metodo de assinatura
+	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		return nil, fmt.Errorf("Unexpected algoithm %s", token.Header["alg"])
+	}
+	return config.Secret, nil
 }
