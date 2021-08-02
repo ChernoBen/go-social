@@ -1,0 +1,10 @@
+production:
+  dialect: mysql
+  datasource: sammy:password@/dev?parseTime=True&loc=Local
+  dir: ./src/database/migrations
+  table: migrations
+development:
+  dialect: mysql
+  datasource: sammy:password@/dev?parseTime=True&loc=Local
+  dir: ./src/database/migrations
+  table: migrations
