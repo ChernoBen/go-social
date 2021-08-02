@@ -1,7 +1,10 @@
 # API !
 
-Exemplo simples de API usando de usuários Gorilla Mux e MySql.
+Exemplo simples de API de usuários utilizando Gorilla Mux e MySql.
 Status: ainda em desenvolvimento.
+
+#Schema:
+![Alt text](api/doc/schema.png?raw=true "Title")
 
 **SOBRE PACOTES**
     - *Objetivo*: 
