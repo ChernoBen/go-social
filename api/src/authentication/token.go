@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -59,4 +60,21 @@ func getKey(token *jwt.Token) (interface{}, error) {
 		return nil, fmt.Errorf("Unexpected algoithm %s", token.Header["alg"])
 	}
 	return config.Secret, nil
+}
+
+//função que estrai ID do token/retorna um uint64 e um erro
+func GetID(r *http.Request) (uint64, error) {
+	token := getToken(r)
+	tk, err := jwt.Parse(token, getKey)
+	if err != nil {
+		return 0, err
+	}
+	if permissions, ok := tk.Claims.(jwt.MapClaims); ok && tk.Valid {
+		userID, err := strconv.ParseUint(fmt.Sprintf("%.0f", permissions["id"]), 10, 64)
+		if err != nil {
+			return 0, err
+		}
+		return userID, nil
+	}
+	return 0, errors.New("Invalid Token")
 }
