@@ -226,3 +226,31 @@ func (u User) Followers(userID uint64) ([]models.User, error) {
 	}
 	return followers, nil
 }
+
+// metodo que retorna lista de user que se está seguind
+func (u User) Following(userID uint64) ([]models.User, error) {
+	lines, err := u.db.Query(
+		`SELECT u.id,u.name,u.nick,u.email,u.createdat FROM users u INNER JOIN
+		followers f on u.id = f.user_id WHERE f.follower_id = ?`,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer lines.Close()
+	var following []models.User
+	for lines.Next() {
+		var user models.User
+		if err = lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Nick,
+			&user.Email,
+			&user.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		following = append(following, user)
+	}
+	return following, nil
+}
