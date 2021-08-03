@@ -59,5 +59,37 @@ func (a Article) FindByID(articleID uint64) (models.Articles, error) {
 		}
 	}
 	return article, nil
+}
+
+//metodo que recebe um ID uint64 e retorna slice de articles e um error/
+func (a Article) FindArticlesByUser(userID uint64) ([]models.Articles, error) {
+	lines, err := a.db.Query(
+		`SELECT DISTINCT a.*, u.nick FROM articles a 
+		INNER JOIN users u ON u.id = a.author_id 
+		INNER JOIN followers f ON a.author_id = f.user_id 
+		WHERE u.id = ? OR f.follower_id = ?`,
+		userID, userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer lines.Close()
+	var articles []models.Articles
+	for lines.Next() {
+		var article models.Articles
+		if err = lines.Scan(
+			&article.ID,
+			&article.Title,
+			&article.Content,
+			&article.AuthorID,
+			&article.Likes,
+			&article.CreatedAt,
+			&article.AuthorNick,
+		); err != nil {
+			return nil, err
+		}
+		articles = append(articles, article)
+	}
+	return articles, nil
 
 }
