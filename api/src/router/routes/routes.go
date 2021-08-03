@@ -23,6 +23,8 @@ func Config(r *mux.Router) *mux.Router {
 	routes := userRoutes
 	//adicionando novas rotas
 	routes = append(routes, loginRoute)
+	// detructuring operator "..."
+	routes = append(routes, articleRoutes...)
 	//usar handlefunc para configurar cada rota
 	for _, route := range routes {
 		if route.Authentication {
