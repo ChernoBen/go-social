@@ -53,5 +53,10 @@ var userRoutes = []Route{
 		Method:         http.MethodGet,
 		Function:       controllers.Following,
 		Authentication: false,
+	}, {
+		URI:            "/users/{id}/password",
+		Method:         http.MethodPost,
+		Function:       controllers.UpdatePassword,
+		Authentication: true,
 	},
 }
