@@ -6,6 +6,7 @@ import (
 	"api/src/models"
 	"api/src/repositories"
 	"api/src/responses"
+	"api/src/security"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -310,4 +311,65 @@ func Following(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	responses.Json(w, http.StatusOK, followings)
+}
+
+//Update password/ não utilizar put por convenção
+func UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	//obter user id do token
+	tokenID, err := authentication.GetID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+	//user id da requisição
+	params := mux.Vars(r)
+	paramID, err := strconv.ParseUint(params["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	if tokenID != paramID {
+		responses.Error(w, http.StatusForbidden, errors.New("Can not update a pass that is not yours"))
+		return
+	}
+	//obter corpo da requisicao
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	var pass models.Password
+	if err = json.Unmarshal(reqBody, &pass); err != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	repo := repositories.NewUserRepository(db)
+	//buscar hash de senha salva no banco
+	hashpass, err := repo.FindHashPass(tokenID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	//comparar a senha no banco com a senha atual
+	if err = security.Verify(pass.Actual, hashpass); err != nil {
+		responses.Error(w, http.StatusForbidden, errors.New("Actual password is not valid"))
+		return
+	}
+	//tratar nova senha para poder inserir no banco
+	newHashPass, err := security.Hash(pass.New)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	if err = repo.UpdatePassword(tokenID, string(newHashPass)); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.Json(w, http.StatusNoContent, nil)
 }
