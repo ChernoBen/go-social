@@ -67,7 +67,7 @@ func (a Article) FindArticlesByUser(userID uint64) ([]models.Articles, error) {
 		`SELECT DISTINCT a.*, u.nick FROM articles a 
 		INNER JOIN users u ON u.id = a.author_id 
 		INNER JOIN followers f ON a.author_id = f.user_id 
-		WHERE u.id = ? OR f.follower_id = ?`,
+		WHERE u.id = ? OR f.follower_id = ? ORDER BY 1 DESC`,
 		userID, userID,
 	)
 	if err != nil {
