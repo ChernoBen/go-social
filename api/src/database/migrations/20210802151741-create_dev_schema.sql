@@ -21,7 +21,7 @@ CREATE TABLE followers (
     PRIMARY KEY (user_id,follower_id)
 ) ENGINE=INNODB;
 
-CREATE TABLE authors(
+CREATE TABLE articles(
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(50) NOT NULL,
     content VARCHAR(350) NOT NULL,
