@@ -28,6 +28,10 @@ func CreateArticle(w http.ResponseWriter, r *http.Request) {
 		responses.Error(w, http.StatusBadRequest, err)
 		return
 	}
+	if err = newArticle.Prepare(); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
 	newArticle.AuthorID = tokenID
 	db, err := database.Connect()
 	if err != nil {
