@@ -254,3 +254,37 @@ func (u User) Following(userID uint64) ([]models.User, error) {
 	}
 	return following, nil
 }
+
+//metodo que busca hashpass salvo na tabeal users
+func (u User) FindHashPass(userID uint64) (string, error) {
+	line, err := u.db.Query(
+		"SELECT password FROM users WHERE id = ?",
+		userID,
+	)
+	if err != nil {
+		return "", err
+	}
+	defer line.Close()
+	var user models.User
+	if line.Next() {
+		if err = line.Scan(&user.Password); err != nil {
+			return "", err
+		}
+	}
+	return user.Password, nil
+}
+
+//metodo que atualiza a senha de um usuario/ 2 parametros id:uint64 hashPassword:string
+func (u User) UpdatePassword(userID uint64, newPassword string) error {
+	statement, err := u.db.Prepare(
+		"UPDATE users SET password = ? WHERE id = ?",
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+	if _, err = statement.Exec(newPassword, userID); err != nil {
+		return err
+	}
+	return nil
+}
