@@ -197,3 +197,31 @@ func (u User) Unfollow(userID, FollowerID uint64) error {
 	}
 	return nil
 }
+
+//metodo que retorna seguidores de determinado id informado
+func (u User) Followers(userID uint64) ([]models.User, error) {
+	lines, err := u.db.Query(
+		`SELECT u.id, u.name,u.nick,u.email,u.createdat FROM users u INNER JOIN
+		followers f on u.id = f.follower_id WHERE f.user_id = ?`,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer lines.Close()
+	var followers []models.User
+	for lines.Next() {
+		var user models.User
+		if err = lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Nick,
+			&user.Email,
+			&user.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		followers = append(followers, user)
+	}
+	return followers, nil
+}
