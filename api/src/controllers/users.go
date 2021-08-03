@@ -263,3 +263,27 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.Json(w, http.StatusNoContent, nil)
 }
+
+//List Followers /id de quem é seguido
+func Followers(w http.ResponseWriter, r *http.Request) {
+	//obter parametros da rota
+	params := mux.Vars(r)
+	paramID, err := strconv.ParseUint(params["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	repo := repositories.NewUserRepository(db)
+	var followers []models.User
+	if followers, err = repo.Followers(paramID); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.Json(w, http.StatusOK, followers)
+}
