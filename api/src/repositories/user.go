@@ -200,6 +200,7 @@ func (u User) Unfollow(userID, FollowerID uint64) error {
 
 //metodo que retorna seguidores de determinado id informado
 func (u User) Followers(userID uint64) ([]models.User, error) {
+	//selecione/retorne na/da tabela USUARIOS valores onde o u.id é igual a f.follower_id
 	lines, err := u.db.Query(
 		`SELECT u.id, u.name,u.nick,u.email,u.createdat FROM users u INNER JOIN
 		followers f on u.id = f.follower_id WHERE f.user_id = ?`,
