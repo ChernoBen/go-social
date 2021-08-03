@@ -52,9 +52,27 @@ func CreateArticle(w http.ResponseWriter, r *http.Request) {
 	responses.Json(w, http.StatusCreated, articleID)
 }
 
-//List articles
+//List articles/lista publições de proprio usuario e de quem ele segue
 func ListArticles(w http.ResponseWriter, r *http.Request) {
-
+	tokenID, err := authentication.GetID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	repo := repositories.NewArticleRepository(db)
+	var articles []models.Articles
+	articles, err = repo.FindArticlesByUser(tokenID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.Json(w, http.StatusOK, articles)
 }
 
 //Get Article by ID
