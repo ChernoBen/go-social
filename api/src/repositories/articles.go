@@ -93,3 +93,16 @@ func (a Article) FindArticlesByUser(userID uint64) ([]models.Articles, error) {
 	return articles, nil
 
 }
+
+//metodo que atualiza dados de um article recebendo um articleID e um model Article e retorna um error/
+func (a Article) UpdateArticle(articleID uint64, article models.Articles) error {
+	statement, err := a.db.Prepare("UPDATE articles SET title = ?, content = ? WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+	if _, err = statement.Exec(article.Title, article.Content, articleID); err != nil {
+		return err
+	}
+	return nil
+}
