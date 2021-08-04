@@ -162,3 +162,21 @@ func (a Article) LikeArticle(articleID uint64) error {
 	}
 	return nil
 }
+
+//metodo que remove uma curtida na tabela articles
+func (a Article) UnlikeArticle(articleID uint64) error {
+	//set curtidas = curtidas -1 se curtidas ==0 senao curtidas = curtidas(0)
+	statement, err := a.db.Prepare(
+		`UPDATE articles SET likes = 
+		CASE WHEN likes > 0 THEN likes - 1
+		ELSE likes END WHERE id = ?`,
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+	if _, err = statement.Exec(articleID); err != nil {
+		return err
+	}
+	return nil
+}
