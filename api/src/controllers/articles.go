@@ -53,6 +53,30 @@ func CreateArticle(w http.ResponseWriter, r *http.Request) {
 	responses.Json(w, http.StatusCreated, articleID)
 }
 
+//List all user articles
+func UserArticles(w http.ResponseWriter, r *http.Request) {
+	param := mux.Vars(r)
+	userID, err := strconv.ParseUint(param["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	var userArticles []models.Articles
+	repo := repositories.NewArticleRepository(db)
+	userArticles, err = repo.FindUserArticles(userID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.Json(w, http.StatusOK, userArticles)
+}
+
 //List articles/lista publições de proprio usuario e de quem ele segue
 func ListArticles(w http.ResponseWriter, r *http.Request) {
 	tokenID, err := authentication.GetID(r)
