@@ -7,6 +7,7 @@ import (
 	"api/src/repositories"
 	"api/src/responses"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -100,6 +101,57 @@ func GetArticle(w http.ResponseWriter, r *http.Request) {
 
 //Update Article by ID
 func UpdateArticle(w http.ResponseWriter, r *http.Request) {
+	tokenID, err := authentication.GetID(r)
+	if err != nil {
+		responses.Error(w, http.StatusUnauthorized, err)
+		return
+	}
+	//id da publicação a ser editada
+	param := mux.Vars(r)
+	articleID, err := strconv.ParseUint(param["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	repo := repositories.NewArticleRepository(db)
+	//verificar se o artigo pertence ao usuario
+	actualArticle, err := repo.FindByID(articleID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	if actualArticle.AuthorID != tokenID {
+		responses.Error(w, http.StatusForbidden, errors.New("Can not update an article that is not yours"))
+		return
+	}
+	// obter nova edição do body
+	bodyContent, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	// fortatar conteudo do body p/ tipo model.Article
+	var newArticle models.Articles
+	if err = json.Unmarshal(bodyContent, &newArticle); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	//verificar e formatar novo modelo de artigo
+	if err = newArticle.Prepare(); err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	if err = repo.UpdateArticle(articleID, newArticle); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.Json(w, http.StatusNoContent, nil)
 
 }
 
