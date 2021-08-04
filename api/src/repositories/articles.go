@@ -106,3 +106,16 @@ func (a Article) UpdateArticle(articleID uint64, article models.Articles) error 
 	}
 	return nil
 }
+
+//metodo que recebe um article id e user id/ retorna um error
+func (a Article) DeleteArticle(articleID, userID uint64) error {
+	statement, err := a.db.Prepare("DELETE FROM articles WHERE id =?")
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+	if _, err = statement.Exec(articleID); err != nil {
+		return err
+	}
+	return nil
+}
