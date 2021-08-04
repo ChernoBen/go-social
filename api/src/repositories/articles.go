@@ -149,3 +149,16 @@ func (a Article) FindUserArticles(userID uint64) ([]models.Articles, error) {
 	}
 	return articles, nil
 }
+
+//metodo que insere uma curtida na tabela articles
+func (a Article) LikeArticle(articleID uint64) error {
+	statement, err := a.db.Prepare("UPDATE articles SET likes = likes + 1 WHERE id = ? ")
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+	if _, err = statement.Exec(articleID); err != nil {
+		return err
+	}
+	return nil
+}
