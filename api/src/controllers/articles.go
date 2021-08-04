@@ -215,3 +215,25 @@ func DeleteArticle(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.Json(w, http.StatusNoContent, nil)
 }
+
+//Like article
+func Like(w http.ResponseWriter, r *http.Request) {
+	param := mux.Vars(r)
+	articleID, err := strconv.ParseUint(param["id"], 10, 64)
+	if err != nil {
+		responses.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	repo := repositories.NewArticleRepository(db)
+	if err = repo.LikeArticle(articleID); err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.Json(w, http.StatusNoContent, nil)
+}
