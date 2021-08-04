@@ -119,3 +119,33 @@ func (a Article) DeleteArticle(articleID, userID uint64) error {
 	}
 	return nil
 }
+
+//metodo que recebe um id e retorna um slice de models.Articles e um err
+func (a Article) FindUserArticles(userID uint64) ([]models.Articles, error) {
+	lines, err := a.db.Query(
+		`SELECT a.*,u.nick FROM articles a
+		JOIN users u ON u.id = a.author_id
+		WHERE a.author_id = ?`,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	var articles []models.Articles
+	for lines.Next() {
+		var item models.Articles
+		if err = lines.Scan(
+			&item.ID,
+			&item.Title,
+			&item.Content,
+			&item.AuthorID,
+			&item.Likes,
+			&item.CreatedAt,
+			&item.AuthorNick,
+		); err != nil {
+			return nil, err
+		}
+		articles = append(articles, item)
+	}
+	return articles, nil
+}
