@@ -36,5 +36,10 @@ var articleRoutes = []Route{
 		Method:         http.MethodGet,
 		Function:       controllers.UserArticles,
 		Authentication: false,
+	}, {
+		URI:            "/articles/{id}/like",
+		Method:         http.MethodPost,
+		Function:       controllers.Like,
+		Authentication: true,
 	},
 }
