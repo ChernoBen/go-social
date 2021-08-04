@@ -31,5 +31,10 @@ var articleRoutes = []Route{
 		Method:         http.MethodDelete,
 		Function:       controllers.DeleteArticle,
 		Authentication: true,
+	}, {
+		URI:            "/user/{id}/articles",
+		Method:         http.MethodGet,
+		Function:       controllers.UserArticles,
+		Authentication: false,
 	},
 }
