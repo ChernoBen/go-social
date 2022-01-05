@@ -8,7 +8,7 @@ Status: ainda em desenvolvimento.
 
 ![Alt text](api/doc/schema.png?raw=true "Title")
 
-**SOBRE PACOTES**
+# **SOBRE PACOTES**
     - *Objetivo*: 
     ``Obter um bom isolamento entre as partes``
     - *Principais*:
@@ -16,7 +16,8 @@ Status: ainda em desenvolvimento.
         - **- ex: (Main, Router, Controllers, Modelos, Repositorios( Manipulação do banco )**
     - *Auxiliares*:
 ``Pacotes relacionados a utilizades do projeto`` 
-    **- ex: (Config, Banco, Autenticação, MiddleWare, Segurança, Respostas)**
+   # **- ex: (Config, Banco, Autenticação, MiddleWare, Segurança, Respostas)**
+
         - Config: configurações de variaveis de ambiente
         - Banco: Responsavel pela conexão com banco(obs: não deve manipular o banco)
         - Autenticação: Login, criação de token e demais responsabilidades de autenticação
